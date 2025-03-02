@@ -17,9 +17,9 @@ export function Calls() {
   const [dateRange, setDateRange] = useState<string | undefined>(undefined);
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-background w-screen">
       {/* Sidebar navigation component */}
-      <Sidebar />
+      {/* <Sidebar /> */}
 
       {/* Main content area with overflow handling for scrolling */}
       <main className="flex-1 overflow-auto">
