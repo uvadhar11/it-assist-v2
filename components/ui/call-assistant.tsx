@@ -18,7 +18,7 @@ export default function CallAssistantInterface() {
   };
 
   return (
-    <div className="flex flex-col gap-4 max-w-sm mx-auto p-4">
+    <div className="flex flex-col gap-4 max-w-sm mx-auto pt-6">
       {callStatus === "waiting" ? (
         <div className="bg-gray-100 rounded-lg p-3 flex justify-between items-center">
           <div className="flex items-center gap-3">
