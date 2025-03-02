@@ -70,7 +70,7 @@ export function CallTable({ searchQuery, dateRange }: CallTableProps) {
   ];
 
   // State to track which calls are currently selected
-  const [selectedCalls, setSelectedCalls] = useState<string[]>([]);
+  // const [selectedCalls, setSelectedCalls] = useState<string[]>([]);
 
   /**
    * Filter calls based on search query and date range
@@ -97,25 +97,25 @@ export function CallTable({ searchQuery, dateRange }: CallTableProps) {
    * If all are currently selected, deselects all
    * If some or none are selected, selects all
    */
-  const toggleSelectAll = () => {
-    if (selectedCalls.length === filteredCalls.length) {
-      setSelectedCalls([]);
-    } else {
-      setSelectedCalls(filteredCalls.map((call) => call.id));
-    }
-  };
+  // const toggleSelectAll = () => {
+  //   if (selectedCalls.length === filteredCalls.length) {
+  //     setSelectedCalls([]);
+  //   } else {
+  //     setSelectedCalls(filteredCalls.map((call) => call.id));
+  //   }
+  // };
 
-  /**
-   * Toggles selection of a single call
-   * @param callId - ID of the call to toggle
-   */
-  const toggleSelectCall = (callId: string) => {
-    if (selectedCalls.includes(callId)) {
-      setSelectedCalls(selectedCalls.filter((id) => id !== callId));
-    } else {
-      setSelectedCalls([...selectedCalls, callId]);
-    }
-  };
+  // /**
+  //  * Toggles selection of a single call
+  //  * @param callId - ID of the call to toggle
+  //  */
+  // const toggleSelectCall = (callId: string) => {
+  //   if (selectedCalls.includes(callId)) {
+  //     setSelectedCalls(selectedCalls.filter((id) => id !== callId));
+  //   } else {
+  //     setSelectedCalls([...selectedCalls, callId]);
+  //   }
+  // };
 
   return (
     <div className="border rounded-md">
@@ -125,13 +125,13 @@ export function CallTable({ searchQuery, dateRange }: CallTableProps) {
           <TableRow>
             {/* Checkbox column for selecting all calls */}
             <TableHead className="w-[50px]">
-              <Checkbox
+              {/* <Checkbox
                 checked={
                   selectedCalls.length === filteredCalls.length &&
                   filteredCalls.length > 0
                 }
                 onCheckedChange={toggleSelectAll}
-              />
+              /> */}
             </TableHead>
             <TableHead>Call ID #</TableHead>
             <TableHead>Topic</TableHead>
@@ -146,12 +146,12 @@ export function CallTable({ searchQuery, dateRange }: CallTableProps) {
           {filteredCalls.map((call) => (
             <TableRow key={call.id}>
               {/* Checkbox cell for selecting individual calls */}
-              <TableCell>
-                <Checkbox
+              {/* <TableCell> */}
+              {/* <Checkbox
                   checked={selectedCalls.includes(call.id)}
                   onCheckedChange={() => toggleSelectCall(call.id)}
-                />
-              </TableCell>
+                /> */}
+              {/* </TableCell> */}
               {/* Call ID with emphasized styling */}
               <TableCell className="font-medium">
                 <Link href="/calls/T-1234">{call.id}</Link>

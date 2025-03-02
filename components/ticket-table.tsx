@@ -12,6 +12,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@radix-ui/react-dropdown-menu";
 
 /**
  * Ticket interface defines the structure of a ticket object
@@ -45,7 +51,7 @@ interface TicketTableProps {
  */
 export function TicketTable({ searchQuery, dateRange }: TicketTableProps) {
   // Sample ticket data - in a real application, this would come from an API
-  const allTickets: Ticket[] = [
+  const [allTickets, setAllTickets] = useState<Ticket[]>([
     {
       id: "1A3244FC3D1WO",
       topic: "Unable to update the account settings",
@@ -68,115 +74,130 @@ export function TicketTable({ searchQuery, dateRange }: TicketTableProps) {
       dateCreated: "",
       createdBy: "",
     })),
-  ];
+  ]);
 
   // State to track which tickets are currently selected
   const [selectedTickets, setSelectedTickets] = useState<string[]>([]);
 
-  /**
-   * Filter tickets based on search query and date range
-   * Uses useMemo to avoid recalculating on every render
-   */
-  const filteredTickets = useMemo(() => {
-    return allTickets.filter((ticket) => {
-      // Filter by search query (ticket ID or topic)
-      const matchesSearch =
-        searchQuery === "" ||
-        ticket.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        ticket.topic.toLowerCase().includes(searchQuery.toLowerCase());
-
-      // Filter by date range
-      const matchesDate = !dateRange || ticket.dateCreated.includes(dateRange);
-
-      // Only include tickets that match both filters
-      return matchesSearch && matchesDate;
-    });
-  }, [allTickets, searchQuery, dateRange]);
-
-  /**
-   * Toggles selection of all tickets
-   * If all are currently selected, deselects all
-   * If some or none are selected, selects all
-   */
-  const toggleSelectAll = () => {
-    if (selectedTickets.length === filteredTickets.length) {
-      setSelectedTickets([]);
-    } else {
-      setSelectedTickets(filteredTickets.map((ticket) => ticket.id));
-    }
-  };
-
-  /**
-   * Toggles selection of a single ticket
-   * @param ticketId - ID of the ticket to toggle
-   */
-  const toggleSelectTicket = (ticketId: string) => {
-    if (selectedTickets.includes(ticketId)) {
-      setSelectedTickets(selectedTickets.filter((id) => id !== ticketId));
-    } else {
-      setSelectedTickets([...selectedTickets, ticketId]);
-    }
+  // Function to update the status of a ticket
+  const updateTicketStatus = (
+    ticketId: string,
+    newStatus: "Unresolved" | "In Progress" | "Resolved"
+  ) => {
+    setAllTickets((prevTickets) =>
+      prevTickets.map((ticket) =>
+        ticket.id === ticketId ? { ...ticket, status: newStatus } : ticket
+      )
+    );
   };
 
   return (
-    <div className="border rounded-md">
-      <Table>
-        {/* Table header with column titles */}
-        <TableHeader>
-          <TableRow>
-            {/* Checkbox column for selecting all tickets */}
-            <TableHead className="w-[50px]">
-              <Checkbox
-                checked={
-                  selectedTickets.length === filteredTickets.length &&
-                  filteredTickets.length > 0
+    <Table className="border rounded-md">
+      {/* Table header with column titles */}
+      <TableHeader>
+        <TableRow>
+          {/* Checkbox column for selecting all tickets */}
+          <TableHead className="w-[50px]">
+            <Checkbox
+              checked={
+                selectedTickets.length === allTickets.length &&
+                allTickets.length > 0
+              }
+              onCheckedChange={() => {
+                if (selectedTickets.length === allTickets.length) {
+                  setSelectedTickets([]);
+                } else {
+                  setSelectedTickets(allTickets.map((ticket) => ticket.id));
                 }
-                onCheckedChange={toggleSelectAll}
-              />
-            </TableHead>
-            <TableHead>Ticket ID #</TableHead>
-            <TableHead>Topic</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Date Created</TableHead>
-            <TableHead>Created By</TableHead>
+              }}
+            />
+          </TableHead>
+          <TableHead>Ticket ID #</TableHead>
+          <TableHead>Topic</TableHead>
+          <TableHead>Status</TableHead>
+          <TableHead>Date Created</TableHead>
+          <TableHead>Created By</TableHead>
+        </TableRow>
+      </TableHeader>
+
+      {/* Table body with ticket rows */}
+      <TableBody>
+        {allTickets.map((ticket) => (
+          <TableRow key={ticket.id}>
+            {/* Checkbox cell for selecting individual tickets */}
+            <TableCell>
+              {/* <Checkbox
+                checked={selectedTickets.includes(ticket.id)}
+                onCheckedChange={() => {
+                  if (selectedTickets.includes(ticket.id)) {
+                    setSelectedTickets(
+                      selectedTickets.filter((id) => id !== ticket.id)
+                    );
+                  } else {
+                    setSelectedTickets([...selectedTickets, ticket.id]);
+                  }
+                }}
+              /> */}
+            </TableCell>
+            {/* Ticket ID with emphasized styling */}
+            <TableCell className="font-medium">
+              {/* <Link href={`/tickets/${ticket.id}`}>{ticket.id}</Link> */}
+              <Link href={`/tickets/T-1234`}>{ticket.id}</Link>
+            </TableCell>
+
+            {/* Ticket topic/description */}
+            <TableCell>{ticket.topic}</TableCell>
+            {/* Status badge with custom styling for "In Progress" */}
+            <TableCell>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <div>
+                    <Badge
+                      variant="outline"
+                      className={`${
+                        ticket.status === "Unresolved"
+                          ? "bg-red-400 text-white border-red-400"
+                          : ticket.status === "In Progress"
+                          ? "bg-yellow-400 text-black border-yellow-400"
+                          : "bg-green-400 text-white border-green-400"
+                      } cursor-pointer`}
+                    >
+                      {ticket.status}
+                    </Badge>
+                  </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-gray-100 border border-gray-300 rounded-md shadow-lg">
+                  <DropdownMenuItem
+                    onSelect={() => updateTicketStatus(ticket.id, "Unresolved")}
+                    className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                  >
+                    Unresolved
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onSelect={() =>
+                      updateTicketStatus(ticket.id, "In Progress")
+                    }
+                    className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                  >
+                    In Progress
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onSelect={() => updateTicketStatus(ticket.id, "Resolved")}
+                    className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                  >
+                    Resolved
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </TableCell>
+
+            {/* Date when the ticket was created */}
+            <TableCell>{ticket.dateCreated}</TableCell>
+            {/* User who created the ticket */}
+            <TableCell>{ticket.createdBy}</TableCell>
           </TableRow>
-        </TableHeader>
-
-        {/* Table body with ticket rows */}
-        <TableBody>
-          {filteredTickets.map((ticket) => (
-            <TableRow key={ticket.id}>
-              {/* Checkbox cell for selecting individual tickets */}
-              <TableCell>
-                <Checkbox
-                  checked={selectedTickets.includes(ticket.id)}
-                  onCheckedChange={() => toggleSelectTicket(ticket.id)}
-                />
-              </TableCell>
-              {/* Ticket ID with emphasized styling */}
-              <TableCell className="font-medium">
-                <Link href="/tickets/T-1234">{ticket.id}</Link>
-              </TableCell>
-
-              {/* Ticket topic/description */}
-              <TableCell>{ticket.topic}</TableCell>
-              {/* Status badge with custom styling for "In Progress" */}
-              <TableCell>
-                <Badge
-                  variant="outline"
-                  className="bg-yellow-400 text-black border-yellow-400"
-                >
-                  {ticket.status}
-                </Badge>
-              </TableCell>
-              {/* Date when the ticket was created */}
-              <TableCell>{ticket.dateCreated}</TableCell>
-              {/* User who created the ticket */}
-              <TableCell>{ticket.createdBy}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+        ))}
+      </TableBody>
+    </Table>
   );
 }
