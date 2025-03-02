@@ -24,7 +24,7 @@ import Link from "next/link";
 interface Ticket {
   id: string;
   topic: string;
-  status: "In Progress" | "Completed";
+  status: "Unresolved" | "In Progress" | "Resolved";
   dateCreated: string;
   createdBy: string;
 }
