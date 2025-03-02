@@ -38,10 +38,6 @@ interface CallTableProps {
   dateRange: string | undefined;
 }
 
-/**
- * CallTable component displays a table of support calls with filtering and selection
- * It handles call data display, filtering based on search and date, and selection functionality
- */
 export function CallTable({ searchQuery, dateRange }: CallTableProps) {
   // Sample call data - in a real application, this would come from an API
   const allCalls: Call[] = [
@@ -120,7 +116,6 @@ export function CallTable({ searchQuery, dateRange }: CallTableProps) {
   return (
     <div className="border rounded-md">
       <Table>
-        {/* Table header with column titles */}
         <TableHeader>
           <TableRow>
             {/* Checkbox column for selecting all calls */}
@@ -141,7 +136,6 @@ export function CallTable({ searchQuery, dateRange }: CallTableProps) {
           </TableRow>
         </TableHeader>
 
-        {/* Table body with call rows */}
         <TableBody>
           {filteredCalls.map((call) => (
             <TableRow key={call.id}>
@@ -156,14 +150,6 @@ export function CallTable({ searchQuery, dateRange }: CallTableProps) {
               <TableCell className="font-medium pl-[50px]">
                 <Link href="/calls/T-1234">{call.id}</Link>
               </TableCell>
-              {/* Call topic/description */}
-              <TableCell>{call.topic}</TableCell>
-              {/* Status badge with custom styling for "In Progress" */}
-              <TableCell>{call.clientName}</TableCell>
-              {/* Date when the call was created */}
-              <TableCell>{call.dateCreated}</TableCell>
-              {/* User who created the call */}
-              <TableCell>{call.assistedBy}</TableCell>
             </TableRow>
           ))}
         </TableBody>
