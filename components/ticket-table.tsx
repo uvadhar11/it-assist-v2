@@ -1,9 +1,17 @@
 "use client";
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
-import { useState, useMemo } from 'react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { useState, useMemo } from "react";
+import Link from "next/link";
 
 /**
  * Ticket interface defines the structure of a ticket object
@@ -16,7 +24,7 @@ import { useState, useMemo } from 'react';
 interface Ticket {
   id: string;
   topic: string;
-  status: 'In Progress' | 'Completed';
+  status: "In Progress" | "Completed";
   dateCreated: string;
   createdBy: string;
 }
@@ -39,27 +47,27 @@ export function TicketTable({ searchQuery, dateRange }: TicketTableProps) {
   // Sample ticket data - in a real application, this would come from an API
   const allTickets: Ticket[] = [
     {
-      id: '1A3244FC3D1WO',
-      topic: 'Unable to update the account settings',
-      status: 'In Progress',
-      dateCreated: 'Jan 6, 2025 at 4:43 PM',
-      createdBy: 'Bob Billy'
+      id: "1A3244FC3D1WO",
+      topic: "Unable to update the account settings",
+      status: "In Progress",
+      dateCreated: "Jan 6, 2025 at 4:43 PM",
+      createdBy: "Bob Billy",
     },
     {
-      id: '12T9UAHF3KDF',
-      topic: '',
-      status: 'In Progress',
-      dateCreated: '',
-      createdBy: ''
+      id: "12T9UAHF3KDF",
+      topic: "",
+      status: "In Progress",
+      dateCreated: "",
+      createdBy: "",
     },
     // Generate additional sample tickets for demonstration
     ...Array.from({ length: 20 }).map((_, i) => ({
       id: `TICKET${i + 3}`,
-      topic: '',
-      status: 'In Progress' as const,
-      dateCreated: '',
-      createdBy: ''
-    }))
+      topic: "",
+      status: "In Progress" as const,
+      dateCreated: "",
+      createdBy: "",
+    })),
   ];
 
   // State to track which tickets are currently selected
@@ -70,18 +78,16 @@ export function TicketTable({ searchQuery, dateRange }: TicketTableProps) {
    * Uses useMemo to avoid recalculating on every render
    */
   const filteredTickets = useMemo(() => {
-    return allTickets.filter(ticket => {
+    return allTickets.filter((ticket) => {
       // Filter by search query (ticket ID or topic)
-      const matchesSearch = 
-        searchQuery === '' || 
+      const matchesSearch =
+        searchQuery === "" ||
         ticket.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
         ticket.topic.toLowerCase().includes(searchQuery.toLowerCase());
-      
+
       // Filter by date range
-      const matchesDate = 
-        !dateRange || 
-        ticket.dateCreated.includes(dateRange);
-      
+      const matchesDate = !dateRange || ticket.dateCreated.includes(dateRange);
+
       // Only include tickets that match both filters
       return matchesSearch && matchesDate;
     });
@@ -96,7 +102,7 @@ export function TicketTable({ searchQuery, dateRange }: TicketTableProps) {
     if (selectedTickets.length === filteredTickets.length) {
       setSelectedTickets([]);
     } else {
-      setSelectedTickets(filteredTickets.map(ticket => ticket.id));
+      setSelectedTickets(filteredTickets.map((ticket) => ticket.id));
     }
   };
 
@@ -106,7 +112,7 @@ export function TicketTable({ searchQuery, dateRange }: TicketTableProps) {
    */
   const toggleSelectTicket = (ticketId: string) => {
     if (selectedTickets.includes(ticketId)) {
-      setSelectedTickets(selectedTickets.filter(id => id !== ticketId));
+      setSelectedTickets(selectedTickets.filter((id) => id !== ticketId));
     } else {
       setSelectedTickets([...selectedTickets, ticketId]);
     }
@@ -120,8 +126,11 @@ export function TicketTable({ searchQuery, dateRange }: TicketTableProps) {
           <TableRow>
             {/* Checkbox column for selecting all tickets */}
             <TableHead className="w-[50px]">
-              <Checkbox 
-                checked={selectedTickets.length === filteredTickets.length && filteredTickets.length > 0}
+              <Checkbox
+                checked={
+                  selectedTickets.length === filteredTickets.length &&
+                  filteredTickets.length > 0
+                }
                 onCheckedChange={toggleSelectAll}
               />
             </TableHead>
@@ -132,26 +141,29 @@ export function TicketTable({ searchQuery, dateRange }: TicketTableProps) {
             <TableHead>Created By</TableHead>
           </TableRow>
         </TableHeader>
-        
+
         {/* Table body with ticket rows */}
         <TableBody>
           {filteredTickets.map((ticket) => (
             <TableRow key={ticket.id}>
               {/* Checkbox cell for selecting individual tickets */}
               <TableCell>
-                <Checkbox 
+                <Checkbox
                   checked={selectedTickets.includes(ticket.id)}
                   onCheckedChange={() => toggleSelectTicket(ticket.id)}
                 />
               </TableCell>
               {/* Ticket ID with emphasized styling */}
-              <TableCell className="font-medium">{ticket.id}</TableCell>
+              <TableCell className="font-medium">
+                <Link href="/tickets/T-1234">{ticket.id}</Link>
+              </TableCell>
+
               {/* Ticket topic/description */}
               <TableCell>{ticket.topic}</TableCell>
               {/* Status badge with custom styling for "In Progress" */}
               <TableCell>
-                <Badge 
-                  variant="outline" 
+                <Badge
+                  variant="outline"
                   className="bg-yellow-400 text-black border-yellow-400"
                 >
                   {ticket.status}

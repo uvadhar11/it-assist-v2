@@ -46,10 +46,10 @@ export function generateStaticParams() {
 export default async function TicketDetailPage({
   params,
 }: {
-  params: Promise<{ ticketId: string }>;
+  params: Promise<{ callId: string }>;
 }) {
-  // const ticketID = (await params).ticketId;
-  const ticketID = "T-1234";
+  // const callID = (await params).callId;
+  const callID = "T-1234";
 
   return (
     <main className="min-h-screen bg-gray-50 p-4 md:p-8">
@@ -65,7 +65,7 @@ export default async function TicketDetailPage({
               <span>Back to Tickets</span>
             </Button>
           </Link>
-          <span className="text-sm text-gray-500">Ticket #{ticketID}</span>
+          <span className="text-sm text-gray-500">Ticket #{callID}</span>
         </div>
 
         <div className="bg-white border border-blue-500 rounded-lg shadow-sm overflow-hidden">
@@ -259,7 +259,7 @@ export default async function TicketDetailPage({
                       <div className="space-y-4">
                         <div>
                           <h3 className="text-sm font-medium mb-1">Ticket #</h3>
-                          <p className="text-gray-700">{ticketID}</p>
+                          <p className="text-gray-700">{callID}</p>
                         </div>
 
                         <div>
