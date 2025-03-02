@@ -1,5 +1,6 @@
-"use client";
+'use client';
 
+import { useEffect, useState } from 'react';
 import {
   Table,
   TableBody,
@@ -7,163 +8,117 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useState, useMemo } from "react";
-import Link from "next/link";
+} from '@/components/ui/table';
+import { format } from 'date-fns';
+import { Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { getActiveCalls } from '@/lib/api';
+import { CallSession } from '@/types/api';
 
-/**
- * Call interface defines the structure of a call object
- * @property id - Unique identifier for the call
- * @property topic - Subject or description of the call
- * @property clientName - Client name
- * @property dateCreated - Date and time when the call was created
- * @property assistedBy - Name of the employee who helped with the call
- */
-interface Call {
-  id: string;
-  topic: string;
-  clientName: string;
-  dateCreated: string;
-  assistedBy: string;
-}
-
-/**
- * CallTableProps interface defines the properties for the call table component
- * @param searchQuery - Current search query for filtering calls
- * @param dateRange - Current date range for filtering calls
- */
 interface CallTableProps {
   searchQuery: string;
   dateRange: string | undefined;
 }
 
-/**
- * CallTable component displays a table of support calls with filtering and selection
- * It handles call data display, filtering based on search and date, and selection functionality
- */
 export function CallTable({ searchQuery, dateRange }: CallTableProps) {
-  // Sample call data - in a real application, this would come from an API
-  const allCalls: Call[] = [
-    {
-      id: "1A3244FC3D1WO",
-      topic: "Unable to update the account settings",
-      clientName: "BTS",
-      dateCreated: "Jan 6, 2025 at 4:43 PM",
-      assistedBy: "Bob Billy",
-    },
-    {
-      id: "12T9UAHF3KDF",
-      topic: "",
-      clientName: "BTS",
-      dateCreated: "",
-      assistedBy: "",
-    },
-    // Generate additional sample calls for demonstration
-    ...Array.from({ length: 20 }).map((_, i) => ({
-      id: `CALL${i + 3}`,
-      topic: "",
-      clientName: "BTS",
-      dateCreated: "",
-      assistedBy: "",
-    })),
-  ];
+  const [calls, setCalls] = useState<CallSession[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // State to track which calls are currently selected
-  // const [selectedCalls, setSelectedCalls] = useState<string[]>([]);
+  // Fetch calls from API
+  useEffect(() => {
+    async function fetchCalls() {
+      try {
+        const activeCalls = await getActiveCalls();
+        setCalls(activeCalls);
+        setLoading(false);
+      } catch (err) {
+        console.error('Failed to fetch calls:', err);
+        setError('Failed to load active calls');
+        setLoading(false);
+      }
+    }
 
-  /**
-   * Filter calls based on search query and date range
-   * Uses useMemo to avoid recalculating on every render
-   */
-  const filteredCalls = useMemo(() => {
-    return allCalls.filter((call) => {
-      // Filter by search query (call ID or topic)
-      const matchesSearch =
-        searchQuery === "" ||
-        call.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        call.topic.toLowerCase().includes(searchQuery.toLowerCase());
+    fetchCalls();
+    // Set up polling every 10 seconds to keep data fresh
+    const interval = setInterval(fetchCalls, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
-      // Filter by date range
-      const matchesDate = !dateRange || call.dateCreated.includes(dateRange);
+  // Filter calls based on search query
+  const filteredCalls = calls.filter((call) => {
+    // Filter by search query (call ID or caller number)
+    const matchesSearch =
+      searchQuery === '' ||
+      call.call_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (call.caller_number &&
+        call.caller_number.toLowerCase().includes(searchQuery.toLowerCase()));
 
-      // Only include calls that match both filters
-      return matchesSearch && matchesDate;
-    });
-  }, [allCalls, searchQuery, dateRange]);
+    // Filter by date range - would need to implement based on how dateRange is formatted
+    const matchesDate = !dateRange || true; // Implement date filtering logic if needed
 
-  /**
-   * Toggles selection of all calls
-   * If all are currently selected, deselects all
-   * If some or none are selected, selects all
-   */
-  // const toggleSelectAll = () => {
-  //   if (selectedCalls.length === filteredCalls.length) {
-  //     setSelectedCalls([]);
-  //   } else {
-  //     setSelectedCalls(filteredCalls.map((call) => call.id));
-  //   }
-  // };
+    return matchesSearch && matchesDate;
+  });
 
-  // /**
-  //  * Toggles selection of a single call
-  //  * @param callId - ID of the call to toggle
-  //  */
-  // const toggleSelectCall = (callId: string) => {
-  //   if (selectedCalls.includes(callId)) {
-  //     setSelectedCalls(selectedCalls.filter((id) => id !== callId));
-  //   } else {
-  //     setSelectedCalls([...selectedCalls, callId]);
-  //   }
-  // };
+  if (loading) {
+    return (
+      <div className='flex justify-center items-center p-12'>
+        <Loader2 className='w-8 h-8 animate-spin text-muted-foreground' />
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className='p-4 bg-red-50 text-red-700 rounded-md'>{error}</div>;
+  }
+
+  if (filteredCalls.length === 0) {
+    return (
+      <div className='border rounded-md p-6 text-center text-muted-foreground'>
+        No active calls found.
+      </div>
+    );
+  }
 
   return (
-    <div className="border rounded-md">
+    <div className='border rounded-md'>
       <Table>
-        {/* Table header with column titles */}
         <TableHeader>
           <TableRow>
-            {/* Checkbox column for selecting all calls */}
-            <TableHead className="w-[50px]">
-              {/* <Checkbox
-                checked={
-                  selectedCalls.length === filteredCalls.length &&
-                  filteredCalls.length > 0
-                }
-                onCheckedChange={toggleSelectAll}
-              /> */}
-            </TableHead>
-            <TableHead>Call ID #</TableHead>
-            <TableHead>Topic</TableHead>
-            <TableHead>Client</TableHead>
-            <TableHead>Date Created</TableHead>
-            <TableHead>Assisted By</TableHead>
+            <TableHead>Call ID</TableHead>
+            <TableHead>Caller Number</TableHead>
+            <TableHead>Start Time</TableHead>
+            <TableHead>Duration</TableHead>
+            <TableHead>Agent ID</TableHead>
+            <TableHead>Status</TableHead>
           </TableRow>
         </TableHeader>
 
-        {/* Table body with call rows */}
         <TableBody>
           {filteredCalls.map((call) => (
-            <TableRow key={call.id}>
-              {/* Checkbox cell for selecting individual calls */}
-              {/* <TableCell> */}
-              {/* <Checkbox
-                  checked={selectedCalls.includes(call.id)}
-                  onCheckedChange={() => toggleSelectCall(call.id)}
-                /> */}
-              {/* </TableCell> */}
-              {/* Call ID with emphasized styling */}
-              <TableCell className="font-medium">
-                <Link href="/calls/T-1234">{call.id}</Link>
+            <TableRow
+              key={call.call_id}
+              className='cursor-pointer hover:bg-accent/50'
+            >
+              <TableCell className='font-medium'>
+                <Link href={`/calls/${call.call_id}`}>
+                  {call.call_id.substring(0, 8)}...
+                </Link>
               </TableCell>
-              {/* Call topic/description */}
-              <TableCell>{call.topic}</TableCell>
-              {/* Status badge with custom styling for "In Progress" */}
-              <TableCell>{call.clientName}</TableCell>
-              {/* Date when the call was created */}
-              <TableCell>{call.dateCreated}</TableCell>
-              {/* User who created the call */}
-              <TableCell>{call.assistedBy}</TableCell>
+              <TableCell>{call.caller_number || 'Unknown'}</TableCell>
+              <TableCell>
+                {format(new Date(call.start_time), 'MMM d, yyyy HH:mm')}
+              </TableCell>
+              <TableCell>
+                {Math.floor(call.duration / 60)}:
+                {String(Math.floor(call.duration % 60)).padStart(2, '0')}
+              </TableCell>
+              <TableCell>{call.agent_id}</TableCell>
+              <TableCell>
+                <span className='inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20'>
+                  Active
+                </span>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

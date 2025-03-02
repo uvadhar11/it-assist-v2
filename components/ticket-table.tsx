@@ -1,5 +1,6 @@
-"use client";
+'use client';
 
+import { useEffect, useState } from 'react';
 import {
   Table,
   TableBody,
@@ -7,197 +8,204 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { useState, useMemo } from "react";
-import Link from "next/link";
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { format } from 'date-fns';
+import { Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { getAllTickets, closeTicket } from '@/lib/api';
+import { Ticket } from '@/types/api';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@radix-ui/react-dropdown-menu";
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { MoreHorizontal } from 'lucide-react';
 
-/**
- * Ticket interface defines the structure of a ticket object
- * @property id - Unique identifier for the ticket
- * @property topic - Subject or description of the ticket
- * @property status - Current status of the ticket (In Progress or Completed)
- * @property dateCreated - Date and time when the ticket was created
- * @property createdBy - Name of the user who created the ticket
- */
-interface Ticket {
-  id: string;
-  topic: string;
-  status: "Unresolved" | "In Progress" | "Resolved";
-  dateCreated: string;
-  createdBy: string;
-}
-
-/**
- * TicketTableProps interface defines the properties for the ticket table component
- * @param searchQuery - Current search query for filtering tickets
- * @param dateRange - Current date range for filtering tickets
- */
 interface TicketTableProps {
   searchQuery: string;
   dateRange: string | undefined;
 }
 
-/**
- * TicketTable component displays a table of support tickets with filtering and selection
- * It handles ticket data display, filtering based on search and date, and selection functionality
- */
 export function TicketTable({ searchQuery, dateRange }: TicketTableProps) {
-  // Sample ticket data - in a real application, this would come from an API
-  const [allTickets, setAllTickets] = useState<Ticket[]>([
-    {
-      id: "1A3244FC3D1WO",
-      topic: "Unable to update the account settings",
-      status: "In Progress",
-      dateCreated: "Jan 6, 2025 at 4:43 PM",
-      createdBy: "Bob Billy",
-    },
-    {
-      id: "12T9UAHF3KDF",
-      topic: "",
-      status: "In Progress",
-      dateCreated: "",
-      createdBy: "",
-    },
-    // Generate additional sample tickets for demonstration
-    ...Array.from({ length: 20 }).map((_, i) => ({
-      id: `TICKET${i + 3}`,
-      topic: "",
-      status: "In Progress" as const,
-      dateCreated: "",
-      createdBy: "",
-    })),
-  ]);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // State to track which tickets are currently selected
-  const [selectedTickets, setSelectedTickets] = useState<string[]>([]);
+  // Fetch tickets from API
+  useEffect(() => {
+    async function fetchTickets() {
+      try {
+        const allTickets = await getAllTickets();
+        setTickets(allTickets);
+        setLoading(false);
+      } catch (err) {
+        console.error('Failed to fetch tickets:', err);
+        setError('Failed to load tickets');
+        setLoading(false);
+      }
+    }
 
-  // Function to update the status of a ticket
-  const updateTicketStatus = (
-    ticketId: string,
-    newStatus: "Unresolved" | "In Progress" | "Resolved"
-  ) => {
-    setAllTickets((prevTickets) =>
-      prevTickets.map((ticket) =>
-        ticket.id === ticketId ? { ...ticket, status: newStatus } : ticket
-      )
-    );
+    fetchTickets();
+  }, []);
+
+  // Handle ticket status update
+  const updateTicketStatus = async (ticketId: string, newStatus: 'closed') => {
+    try {
+      if (newStatus === 'closed') {
+        await closeTicket(ticketId, 'Manually closed by agent');
+
+        // Update the local state to reflect the change
+        setTickets(
+          tickets.map((ticket) =>
+            ticket.ticket_id === ticketId
+              ? {
+                  ...ticket,
+                  status: 'closed',
+                  closed_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString(),
+                }
+              : ticket,
+          ),
+        );
+      }
+    } catch (err) {
+      console.error(`Failed to update ticket ${ticketId} status:`, err);
+      alert('Failed to update ticket status. Please try again.');
+    }
   };
 
+  // Filter tickets based on search query
+  const filteredTickets = tickets.filter((ticket) => {
+    // Filter by search query (ticket ID or caller number)
+    const matchesSearch =
+      searchQuery === '' ||
+      ticket.ticket_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (ticket.caller_number &&
+        ticket.caller_number.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    // Filter by date range - would need to implement based on how dateRange is formatted
+    const matchesDate = !dateRange || true; // Implement date filtering logic if needed
+
+    return matchesSearch && matchesDate;
+  });
+
+  if (loading) {
+    return (
+      <div className='flex justify-center items-center p-12'>
+        <Loader2 className='w-8 h-8 animate-spin text-muted-foreground' />
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className='p-4 bg-red-50 text-red-700 rounded-md'>{error}</div>;
+  }
+
+  if (filteredTickets.length === 0) {
+    return (
+      <div className='border rounded-md p-6 text-center text-muted-foreground'>
+        No tickets found.
+      </div>
+    );
+  }
+
   return (
-    <Table className="border rounded-md">
-      {/* Table header with column titles */}
-      <TableHeader>
-        <TableRow>
-          {/* Checkbox column for selecting all tickets */}
-          <TableHead className="w-[50px]">
-            <Checkbox
-              checked={
-                selectedTickets.length === allTickets.length &&
-                allTickets.length > 0
-              }
-              onCheckedChange={() => {
-                if (selectedTickets.length === allTickets.length) {
-                  setSelectedTickets([]);
-                } else {
-                  setSelectedTickets(allTickets.map((ticket) => ticket.id));
-                }
-              }}
-            />
-          </TableHead>
-          <TableHead>Ticket ID #</TableHead>
-          <TableHead>Topic</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Date Created</TableHead>
-          <TableHead>Created By</TableHead>
-        </TableRow>
-      </TableHeader>
-
-      {/* Table body with ticket rows */}
-      <TableBody>
-        {allTickets.map((ticket) => (
-          <TableRow key={ticket.id}>
-            {/* Checkbox cell for selecting individual tickets */}
-            <TableCell>
-              {/* <Checkbox
-                checked={selectedTickets.includes(ticket.id)}
-                onCheckedChange={() => {
-                  if (selectedTickets.includes(ticket.id)) {
-                    setSelectedTickets(
-                      selectedTickets.filter((id) => id !== ticket.id)
-                    );
-                  } else {
-                    setSelectedTickets([...selectedTickets, ticket.id]);
-                  }
-                }}
-              /> */}
-            </TableCell>
-            {/* Ticket ID with emphasized styling */}
-            <TableCell className="font-medium">
-              {/* <Link href={`/tickets/${ticket.id}`}>{ticket.id}</Link> */}
-              <Link href={`/tickets/T-1234`}>{ticket.id}</Link>
-            </TableCell>
-
-            {/* Ticket topic/description */}
-            <TableCell>{ticket.topic}</TableCell>
-            {/* Status badge with custom styling for "In Progress" */}
-            <TableCell>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <div>
-                    <Badge
-                      variant="outline"
-                      className={`${
-                        ticket.status === "Unresolved"
-                          ? "bg-red-400 text-white border-red-400"
-                          : ticket.status === "In Progress"
-                          ? "bg-yellow-400 text-black border-yellow-400"
-                          : "bg-green-400 text-white border-green-400"
-                      } cursor-pointer`}
-                    >
-                      {ticket.status}
-                    </Badge>
-                  </div>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-gray-100 border border-gray-300 rounded-md shadow-lg">
-                  <DropdownMenuItem
-                    onSelect={() => updateTicketStatus(ticket.id, "Unresolved")}
-                    className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
-                  >
-                    Unresolved
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() =>
-                      updateTicketStatus(ticket.id, "In Progress")
-                    }
-                    className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
-                  >
-                    In Progress
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => updateTicketStatus(ticket.id, "Resolved")}
-                    className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
-                  >
-                    Resolved
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </TableCell>
-
-            {/* Date when the ticket was created */}
-            <TableCell>{ticket.dateCreated}</TableCell>
-            {/* User who created the ticket */}
-            <TableCell>{ticket.createdBy}</TableCell>
+    <div className='border rounded-md'>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Ticket ID</TableHead>
+            <TableHead>Caller Number</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Created</TableHead>
+            <TableHead>Last Updated</TableHead>
+            <TableHead>Agent ID</TableHead>
+            <TableHead className='w-[80px]'>Actions</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+
+        <TableBody>
+          {filteredTickets.map((ticket) => (
+            <TableRow
+              key={ticket.ticket_id}
+              className='cursor-pointer hover:bg-accent/50'
+            >
+              <TableCell className='font-medium'>
+                <Link href={`/tickets/${ticket.ticket_id}`}>
+                  {ticket.ticket_id.substring(0, 8)}...
+                </Link>
+              </TableCell>
+              <TableCell>{ticket.caller_number || 'Unknown'}</TableCell>
+              <TableCell>
+                <Badge
+                  variant={
+                    ticket.status === 'open'
+                      ? 'default'
+                      : ticket.status === 'closed'
+                      ? 'secondary'
+                      : 'outline'
+                  }
+                >
+                  {ticket.status.charAt(0).toUpperCase() +
+                    ticket.status.slice(1)}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                {format(new Date(ticket.created_at), 'MMM d, yyyy')}
+              </TableCell>
+              <TableCell>
+                {format(new Date(ticket.updated_at), 'MMM d, yyyy HH:mm')}
+              </TableCell>
+              <TableCell>{ticket.agent_id}</TableCell>
+              <TableCell>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant='ghost' className='h-8 w-8 p-0'>
+                      <span className='sr-only'>Open menu</span>
+                      <MoreHorizontal className='h-4 w-4' />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align='end'>
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.location.href = `/tickets/${ticket.ticket_id}`;
+                      }}
+                    >
+                      View details
+                    </DropdownMenuItem>
+
+                    {ticket.status === 'open' && (
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateTicketStatus(ticket.ticket_id, 'closed');
+                        }}
+                      >
+                        Close ticket
+                      </DropdownMenuItem>
+                    )}
+
+                    {ticket.call_id && (
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.location.href = `/calls/${ticket.call_id}`;
+                        }}
+                      >
+                        View call
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }
