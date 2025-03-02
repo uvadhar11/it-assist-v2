@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useMemo } from "react";
+import Link from "next/link";
 
 /**
  * Call interface defines the structure of a call object
@@ -152,7 +153,9 @@ export function CallTable({ searchQuery, dateRange }: CallTableProps) {
                 />
               </TableCell>
               {/* Call ID with emphasized styling */}
-              <TableCell className="font-medium">{call.id}</TableCell>
+              <TableCell className="font-medium">
+                <Link href="/calls/T-1234">{call.id}</Link>
+              </TableCell>
               {/* Call topic/description */}
               <TableCell>{call.topic}</TableCell>
               {/* Status badge with custom styling for "In Progress" */}

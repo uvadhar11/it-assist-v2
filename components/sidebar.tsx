@@ -1,7 +1,17 @@
 "use client";
 
-import { Phone, Ticket, BarChart2, BookOpen, Settings, Users, MessageSquare, User } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import {
+  Phone,
+  Ticket,
+  BarChart2,
+  BookOpen,
+  Settings,
+  Users,
+  MessageSquare,
+  User,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 /**
  * SidebarItemProps interface defines the properties for a sidebar item
@@ -21,9 +31,14 @@ interface SidebarItemProps {
  * SidebarItem component renders a single navigation item in the sidebar
  * It handles styling for active state and sub-items with proper indentation
  */
-function SidebarItem({ icon, label, active = false, isSubItem = false }: SidebarItemProps) {
+function SidebarItem({
+  icon,
+  label,
+  active = false,
+  isSubItem = false,
+}: SidebarItemProps) {
   return (
-    <div 
+    <div
       className={cn(
         // Base styles for all sidebar items
         "flex items-center gap-3 px-4 py-3 rounded-md cursor-pointer",
@@ -52,26 +67,32 @@ export function Sidebar() {
       <div className="p-4 border-b">
         <h2 className="text-xl font-bold">LOGOOOOO</h2>
       </div>
-      
+
       {/* Main navigation items section with flex-1 to push profile to bottom */}
       <div className="flex-1 py-4 space-y-1">
         {/* Primary navigation items */}
-        <SidebarItem icon={<Phone size={18} />} label="Active Calls" />
-        <SidebarItem icon={<Ticket size={18} />} label="Tickets" active />
+        <Link href="/calls">
+          <SidebarItem icon={<Phone size={18} />} label="Active Calls" />
+        </Link>
+        <Link href="/">
+          <SidebarItem icon={<Ticket size={18} />} label="Tickets" active />
+        </Link>
         <SidebarItem icon={<BarChart2 size={18} />} label="Data Reports" />
         <SidebarItem icon={<BookOpen size={18} />} label="Knowledge Base" />
         <SidebarItem icon={<Settings size={18} />} label="Settings" />
         <SidebarItem icon={<Users size={18} />} label="Quick Contacts" />
-        
+
         {/* Section header for Conversations */}
         <div className="pt-4 pb-2">
-          <p className="px-4 text-xs font-semibold text-muted-foreground">Conversations</p>
+          <p className="px-4 text-xs font-semibold text-muted-foreground">
+            Conversations
+          </p>
         </div>
-        
+
         {/* Conversation-related navigation items */}
         <SidebarItem icon={<MessageSquare size={18} />} label="Customer Line" />
       </div>
-      
+
       {/* Profile section at the bottom of the sidebar */}
       <div className="border-t">
         {/* Using the same padding and styling as other sidebar items for consistency */}
