@@ -20,9 +20,7 @@ export default function DebugPage() {
             <h2 className='font-semibold mb-2'>Environment Settings</h2>
             <div className='grid grid-cols-2 gap-2 text-sm'>
               <span className='font-medium'>API URL:</span>
-              <span className='font-mono'>
-                {process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081'}
-              </span>
+              <span className='font-mono'>{'http://localhost:8081'}</span>
               <span className='font-medium'>Node Environment:</span>
               <span className='font-mono'>{process.env.NODE_ENV}</span>
             </div>

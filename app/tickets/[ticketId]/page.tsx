@@ -1,6 +1,9 @@
 import { Metadata } from 'next';
-import { TicketDetails } from '@/components/ticket-details';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 import { getAllTickets } from '@/lib/api';
+import { TicketDetailsContent } from '@/components/ticket-details-content';
+import { ArrowLeft } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Ticket Details',
@@ -30,10 +33,30 @@ export default function TicketPage({
 }: {
   params: { ticketId: string };
 }) {
+  const ticketId = params.ticketId;
+
   return (
-    <div className='flex flex-col gap-6'>
-      <TicketDetails ticketId={params.ticketId} />
-    </div>
+    <main className="min-h-screen bg-gray-50 p-4 md:p-8 w-screen bg-[url('/gradient.png')] bg-cover bg-center">
+      <div className='max-w-6xl mx-auto'>
+        <div className='flex items-center gap-2 mb-6'>
+          <Link href='/tickets'>
+            <Button
+              variant='outline'
+              size='sm'
+              className='flex items-center gap-1'
+            >
+              <ArrowLeft className='h-4 w-4' />
+              <span>Back to Tickets</span>
+            </Button>
+          </Link>
+          <span className='text-sm text-gray-500'>Ticket #{ticketId}</span>
+        </div>
+
+        <div className='bg-white border rounded-lg shadow-sm overflow-hidden'>
+          <TicketDetailsContent ticketId={ticketId} />
+        </div>
+      </div>
+    </main>
   );
 }
 

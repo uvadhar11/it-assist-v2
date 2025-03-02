@@ -18,7 +18,7 @@ export function DebugCors() {
   const [loading, setLoading] = useState<boolean>(false);
   const [details, setDetails] = useState<string>('');
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081';
+  const API_URL = 'http://localhost:8081';
 
   const testApiConnection = async () => {
     setLoading(true);

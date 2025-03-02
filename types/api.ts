@@ -1,13 +1,6 @@
-export interface Transcript {
-  role: string;
-  content: string;
-}
+// Types for API responses and data structures
 
-export interface Suggestion {
-  title: string;
-  description: string;
-}
-
+// Call Session
 export interface CallSession {
   call_id: string;
   agent_id: string;
@@ -15,12 +8,27 @@ export interface CallSession {
   caller_number: string;
   last_activity: string;
   duration: number;
-  transcript?: Transcript[];
+  is_active: boolean;
+  ticket_id?: string;
   summary?: string;
   suggestions?: Suggestion[];
-  ticket_id?: string;
+  transcript?: Transcript[];
 }
 
+// Transcript message
+export interface Transcript {
+  role: string;
+  content: string;
+  time: string;
+}
+
+// Suggestion for resolutions
+export interface Suggestion {
+  title: string;
+  description: string;
+}
+
+// Ticket
 export interface Ticket {
   ticket_id: string;
   call_id: string;
@@ -31,10 +39,12 @@ export interface Ticket {
   updated_at: string;
   closed_at?: string;
   transcript?: Transcript[];
+  transcript_string?: string;
   summary?: string;
   suggestions?: Suggestion[];
 }
 
+// WebSocket transcript update message
 export interface TranscriptUpdate {
   type: string;
   call_id: string;
@@ -48,9 +58,9 @@ export interface TranscriptUpdate {
   suggestions?: Suggestion[];
 }
 
-export interface ConnectionResponse {
-  type: string;
+// Other API response types as needed
+export interface ApiResponse {
   status: string;
-  message: string;
-  call_id: string;
+  message?: string;
+  [key: string]: any;
 }

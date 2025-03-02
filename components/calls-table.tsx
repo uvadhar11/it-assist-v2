@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Table,
@@ -7,25 +7,31 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useState, useMemo } from "react";
-import Link from "next/link";
+} from '@/components/ui/table';
+import { useState, useMemo, useEffect } from 'react';
+import Link from 'next/link';
+import { getActiveCalls } from '@/lib/api';
 
 /**
- * Call interface defines the structure of a call object
- * @property id - Unique identifier for the call
- * @property topic - Subject or description of the call
- * @property clientName - Client name
- * @property dateCreated - Date and time when the call was created
- * @property assistedBy - Name of the employee who helped with the call
+ * Call interface defines the structure of a call object based on backend schema
+ * @property call_id - Unique identifier for the call
+ * @property agent_id - ID of the agent assigned to the call
+ * @property start_time - Timestamp when the call started
+ * @property caller_number - Phone number of the caller
+ * @property last_activity - Timestamp of the last activity on the call
+ * @property duration - Duration of the call in seconds
+ * @property ticket_id - ID of the associated ticket
+ * @property summary - Summary of the call
  */
 interface Call {
-  id: string;
-  topic: string;
-  clientName: string;
-  dateCreated: string;
-  assistedBy: string;
+  call_id: string;
+  agent_id: string;
+  start_time: string;
+  caller_number: string;
+  last_activity: string;
+  duration: number;
+  ticket_id?: string;
+  summary?: string;
 }
 
 /**
@@ -39,121 +45,164 @@ interface CallTableProps {
 }
 
 export function CallTable({ searchQuery, dateRange }: CallTableProps) {
-  // Sample call data - in a real application, this would come from an API
-  const allCalls: Call[] = [
-    {
-      id: "1A3244FC3D1WO",
-      topic: "Unable to update the account settings",
-      clientName: "BTS",
-      dateCreated: "Jan 6, 2025 at 4:43 PM",
-      assistedBy: "Bob Billy",
-    },
-    {
-      id: "12T9UAHF3KDF",
-      topic: "",
-      clientName: "BTS",
-      dateCreated: "",
-      assistedBy: "",
-    },
-    // Generate additional sample calls for demonstration
-    ...Array.from({ length: 20 }).map((_, i) => ({
-      id: `CALL${i + 3}`,
-      topic: "",
-      clientName: "BTS",
-      dateCreated: "",
-      assistedBy: "",
-    })),
-  ];
+  // State to hold calls fetched from the backend API
+  const [calls, setCalls] = useState<Call[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // State to track which calls are currently selected
-  // const [selectedCalls, setSelectedCalls] = useState<string[]>([]);
+  // Fetch calls from the backend
+  useEffect(() => {
+    async function fetchCalls() {
+      try {
+        setLoading(true);
+        // Use the API client instead of direct fetch
+        const fetchedCalls = await getActiveCalls();
+        setCalls(fetchedCalls);
+      } catch (err) {
+        console.error('Failed to fetch calls:', err);
+        setError(err instanceof Error ? err.message : 'Unknown error occurred');
+        // Set some dummy data for development purposes
+        setCalls([
+          {
+            call_id: '1A3244FC3D1WO',
+            agent_id: 'agent-001',
+            start_time: new Date().toISOString(),
+            caller_number: '(555) 123-4567',
+            last_activity: new Date().toISOString(),
+            duration: 120,
+            ticket_id: 'T-1234',
+            summary: 'User having trouble with account login',
+          },
+          {
+            call_id: '12T9UAHF3KDF',
+            agent_id: 'agent-002',
+            start_time: new Date().toISOString(),
+            caller_number: '(555) 987-6543',
+            last_activity: new Date().toISOString(),
+            duration: 45,
+            ticket_id: 'T-1235',
+          },
+          {
+            call_id: 'C-9876',
+            agent_id: 'agent-003',
+            start_time: new Date().toISOString(),
+            caller_number: '(555) 555-5555',
+            last_activity: new Date().toISOString(),
+            duration: 180,
+            ticket_id: 'T-1236',
+          },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchCalls();
+    // Poll for updates every 30 seconds to keep active calls list fresh
+    const interval = setInterval(fetchCalls, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   /**
    * Filter calls based on search query and date range
    * Uses useMemo to avoid recalculating on every render
    */
   const filteredCalls = useMemo(() => {
-    return allCalls.filter((call) => {
-      // Filter by search query (call ID or topic)
+    return calls.filter((call) => {
+      // Filter by search query (call ID or agent ID or caller number)
       const matchesSearch =
-        searchQuery === "" ||
-        call.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        call.topic.toLowerCase().includes(searchQuery.toLowerCase());
+        searchQuery === '' ||
+        call.call_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        call.agent_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        call.caller_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (call.summary &&
+          call.summary.toLowerCase().includes(searchQuery.toLowerCase()));
 
-      // Filter by date range
-      const matchesDate = !dateRange || call.dateCreated.includes(dateRange);
+      // Filter by date range - convert ISO timestamps to readable format
+      const callDate = new Date(call.start_time).toLocaleDateString();
+      const matchesDate = !dateRange || callDate.includes(dateRange);
 
       // Only include calls that match both filters
       return matchesSearch && matchesDate;
     });
-  }, [allCalls, searchQuery, dateRange]);
+  }, [calls, searchQuery, dateRange]);
 
-  /**
-   * Toggles selection of all calls
-   * If all are currently selected, deselects all
-   * If some or none are selected, selects all
-   */
-  // const toggleSelectAll = () => {
-  //   if (selectedCalls.length === filteredCalls.length) {
-  //     setSelectedCalls([]);
-  //   } else {
-  //     setSelectedCalls(filteredCalls.map((call) => call.id));
-  //   }
-  // };
+  // Function to format duration as "MM:SS"
+  const formatDuration = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
 
-  // /**
-  //  * Toggles selection of a single call
-  //  * @param callId - ID of the call to toggle
-  //  */
-  // const toggleSelectCall = (callId: string) => {
-  //   if (selectedCalls.includes(callId)) {
-  //     setSelectedCalls(selectedCalls.filter((id) => id !== callId));
-  //   } else {
-  //     setSelectedCalls([...selectedCalls, callId]);
-  //   }
-  // };
+  // Function to format date in a readable way
+  const formatDate = (dateString: string): string => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString();
+    } catch {
+      return dateString;
+    }
+  };
 
   return (
-    <div className="border rounded-md">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            {/* Checkbox column for selecting all calls */}
-            {/* <TableHead className="w-[50px]"> */}
-            {/* <Checkbox
-                checked={
-                  selectedCalls.length === filteredCalls.length &&
-                  filteredCalls.length > 0
-                }
-                onCheckedChange={toggleSelectAll}
-              /> */}
-            {/* </TableHead> */}
-            <TableHead className="pl-[50px]">Call ID #</TableHead>
-            <TableHead>Topic</TableHead>
-            <TableHead>Client</TableHead>
-            <TableHead>Date Created</TableHead>
-            <TableHead>Assisted By</TableHead>
-          </TableRow>
-        </TableHeader>
-
-        <TableBody>
-          {filteredCalls.map((call) => (
-            <TableRow key={call.id}>
-              {/* Checkbox cell for selecting individual calls */}
-              {/* <TableCell> */}
-              {/* <Checkbox
-                  checked={selectedCalls.includes(call.id)}
-                  onCheckedChange={() => toggleSelectCall(call.id)}
-                /> */}
-              {/* </TableCell> */}
-              {/* Call ID with emphasized styling */}
-              <TableCell className="font-medium pl-[50px]">
-                <Link href="/calls/T-1234">{call.id}</Link>
-              </TableCell>
+    <div className='border rounded-md'>
+      {loading ? (
+        <div className='p-4 text-center'>Loading calls...</div>
+      ) : error ? (
+        <div className='p-4 text-center text-red-500'>
+          <p>Error: {error}</p>
+          <p className='text-sm text-gray-500 mt-2'>
+            Using sample data for demonstration
+          </p>
+        </div>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className='pl-[50px]'>Call ID</TableHead>
+              <TableHead>Agent</TableHead>
+              <TableHead>Phone Number</TableHead>
+              <TableHead>Start Time</TableHead>
+              <TableHead>Duration</TableHead>
+              <TableHead>Ticket</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+
+          <TableBody>
+            {filteredCalls.length > 0 ? (
+              filteredCalls.map((call) => (
+                <TableRow key={call.call_id}>
+                  <TableCell className='font-medium pl-[50px]'>
+                    <Link href={`/calls/${call.call_id}`}>{call.call_id}</Link>
+                  </TableCell>
+                  <TableCell>{call.agent_id}</TableCell>
+                  <TableCell>{call.caller_number}</TableCell>
+                  <TableCell>{formatDate(call.start_time)}</TableCell>
+                  <TableCell>{formatDuration(call.duration)}</TableCell>
+                  <TableCell>
+                    {call.ticket_id ? (
+                      <Link
+                        href={`/tickets/${call.ticket_id}`}
+                        className='text-blue-600 hover:underline'
+                      >
+                        {call.ticket_id}
+                      </Link>
+                    ) : (
+                      <span className='text-gray-400'>Not assigned</span>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={6} className='text-center py-4'>
+                  No active calls found
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      )}
     </div>
   );
 }
