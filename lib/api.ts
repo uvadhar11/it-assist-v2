@@ -12,7 +12,6 @@ async function apiRequest(endpoint: string, options: RequestInit = {}) {
 
   // Default options for CORS
   const defaultOptions: RequestInit = {
-    credentials: 'include', // Include cookies in the request
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
