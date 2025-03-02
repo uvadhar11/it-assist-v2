@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+// import { usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 /**
  * SidebarItemProps interface defines the properties for a sidebar item
@@ -61,6 +63,8 @@ function SidebarItem({
  * It contains the logo, main navigation items, section headers, and profile link
  */
 export function Sidebar() {
+  const currentRoute = usePathname();
+
   return (
     <div className="w-64 border-r bg-background flex flex-col h-full">
       {/* Logo section at the top of the sidebar */}
@@ -72,15 +76,39 @@ export function Sidebar() {
       <div className="flex-1 py-4 space-y-1">
         {/* Primary navigation items */}
         <Link href="/calls">
-          <SidebarItem icon={<Phone size={18} />} label="Active Calls" />
+          <SidebarItem
+            icon={<Phone size={18} />}
+            label="Active Calls"
+            active={currentRoute === "/calls"}
+          />
         </Link>
         <Link href="/">
-          <SidebarItem icon={<Ticket size={18} />} label="Tickets" active />
+          <SidebarItem
+            icon={<Ticket size={18} />}
+            label="Tickets"
+            active={currentRoute === "/"}
+          />
         </Link>
-        <SidebarItem icon={<BarChart2 size={18} />} label="Data Reports" />
-        <SidebarItem icon={<BookOpen size={18} />} label="Knowledge Base" />
-        <SidebarItem icon={<Settings size={18} />} label="Settings" />
-        <SidebarItem icon={<Users size={18} />} label="Quick Contacts" />
+        <SidebarItem
+          icon={<BarChart2 size={18} />}
+          label="Data Reports"
+          active={currentRoute === "/dataReports"}
+        />
+        <SidebarItem
+          icon={<BookOpen size={18} />}
+          label="Knowledge Base"
+          active={currentRoute === "/knowledgeBase"}
+        />
+        <SidebarItem
+          icon={<Settings size={18} />}
+          label="Settings"
+          active={currentRoute === "/settings"}
+        />
+        <SidebarItem
+          icon={<Users size={18} />}
+          label="Quick Contacts"
+          active={currentRoute === "/quickContacts"}
+        />
 
         {/* Section header for Conversations */}
         <div className="pt-4 pb-2">
