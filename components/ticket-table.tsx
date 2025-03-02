@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox";
+// import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { useState, useMemo } from "react";
 import Link from "next/link";
@@ -97,8 +97,8 @@ export function TicketTable({ searchQuery, dateRange }: TicketTableProps) {
       <TableHeader>
         <TableRow>
           {/* Checkbox column for selecting all tickets */}
-          <TableHead className="w-[50px]">
-            <Checkbox
+          {/* <TableHead className="w-[50px]"> */}
+          {/* <Checkbox
               checked={
                 selectedTickets.length === allTickets.length &&
                 allTickets.length > 0
@@ -110,11 +110,11 @@ export function TicketTable({ searchQuery, dateRange }: TicketTableProps) {
                   setSelectedTickets(allTickets.map((ticket) => ticket.id));
                 }
               }}
-            />
-          </TableHead>
-          <TableHead>Ticket ID #</TableHead>
-          <TableHead>Topic</TableHead>
-          <TableHead>Status</TableHead>
+            /> */}
+          {/* </TableHead> */}
+          <TableHead className="pl-[50px]">Ticket ID #</TableHead>
+          <TableHead className="px-2">Topic</TableHead>
+          <TableHead className="pl-8 pr-12">Status</TableHead>
           <TableHead>Date Created</TableHead>
           <TableHead>Created By</TableHead>
         </TableRow>
@@ -125,8 +125,8 @@ export function TicketTable({ searchQuery, dateRange }: TicketTableProps) {
         {allTickets.map((ticket) => (
           <TableRow key={ticket.id}>
             {/* Checkbox cell for selecting individual tickets */}
-            <TableCell>
-              {/* <Checkbox
+            {/* <TableCell> */}
+            {/* <Checkbox
                 checked={selectedTickets.includes(ticket.id)}
                 onCheckedChange={() => {
                   if (selectedTickets.includes(ticket.id)) {
@@ -138,17 +138,17 @@ export function TicketTable({ searchQuery, dateRange }: TicketTableProps) {
                   }
                 }}
               /> */}
-            </TableCell>
+            {/* </TableCell> */}
             {/* Ticket ID with emphasized styling */}
-            <TableCell className="font-medium">
+            <TableCell className="font-medium pl-[50px]">
               {/* <Link href={`/tickets/${ticket.id}`}>{ticket.id}</Link> */}
               <Link href={`/tickets/T-1234`}>{ticket.id}</Link>
             </TableCell>
 
             {/* Ticket topic/description */}
-            <TableCell>{ticket.topic}</TableCell>
+            <TableCell className="px-2">{ticket.topic}</TableCell>
             {/* Status badge with custom styling for "In Progress" */}
-            <TableCell>
+            <TableCell className="pl-8 pr-12">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <div>

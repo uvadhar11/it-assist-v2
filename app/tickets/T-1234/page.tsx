@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Avatar } from "@/components/ui/avatar";
+// import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -46,13 +46,13 @@ export function generateStaticParams() {
 export default async function TicketDetailPage({
   params,
 }: {
-  params: Promise<{ ticketId: string }>;
+  params: Promise<{ callId: string }>;
 }) {
-  // const ticketID = (await params).ticketId;
-  const ticketID = "T-1234";
+  // const callID = (await params).callId;
+  const callID = "T-1234";
 
   return (
-    <main className="min-h-screen bg-gray-50 p-4 md:p-8">
+    <main className="min-h-screen bg-gray-50 p-4 md:p-8 w-screen bg-[url('/gradient.png')] bg-cover bg-center">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center gap-2 mb-6">
           <Link href="/">
@@ -65,19 +65,19 @@ export default async function TicketDetailPage({
               <span>Back to Tickets</span>
             </Button>
           </Link>
-          <span className="text-sm text-gray-500">Ticket #{ticketID}</span>
+          <span className="text-sm text-gray-500">Ticket #{callID}</span>
         </div>
 
-        <div className="bg-white border border-blue-500 rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-white border rounded-lg shadow-sm overflow-hidden">
           <div className="flex">
             {/* Left sidebar with avatar */}
-            <div className="w-16 bg-gray-200 flex-shrink-0">
+            {/* <div className="w-16 bg-gray-200 flex-shrink-0">
               <div className="p-3">
                 <Avatar className="h-10 w-10 bg-gray-300">
                   <span className="sr-only">User avatar</span>
                 </Avatar>
               </div>
-            </div>
+            </div> */}
 
             {/* Main content */}
             <div className="flex-1 p-6">
@@ -102,19 +102,19 @@ export default async function TicketDetailPage({
                 <TabsList className="mb-4 bg-transparent border-b border-gray-200 w-full justify-start">
                   <TabsTrigger
                     value="summary"
-                    className="data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:shadow-none rounded-none px-4 py-2"
+                    className="data-[state=active]:text-activepurple data-[state=active]:border-b-2 data-[state=active]:border-activepurple data-[state=active]:shadow-none rounded-none px-4 py-2"
                   >
                     Summary
                   </TabsTrigger>
                   <TabsTrigger
                     value="transcript"
-                    className="data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:shadow-none rounded-none px-4 py-2"
+                    className="data-[state=active]:text-activepurple data-[state=active]:border-b-2 data-[state=active]:border-activepurple data-[state=active]:shadow-none rounded-none px-4 py-2"
                   >
                     Transcript
                   </TabsTrigger>
                   <TabsTrigger
                     value="suggestions"
-                    className="data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:shadow-none rounded-none px-4 py-2"
+                    className="data-[state=active]:text-activepurple data-[state=active]:border-b-2 data-[state=active]:border-activepurple data-[state=active]:shadow-none rounded-none px-4 py-2"
                   >
                     Suggestions
                   </TabsTrigger>
@@ -122,7 +122,7 @@ export default async function TicketDetailPage({
 
                 <div className="flex gap-6">
                   <TabsContent value="summary" className="mt-0 flex-1">
-                    <div className="bg-gray-100 rounded p-4">
+                    <div className="bg-gray-100 rounded p-4 h-full overflow-y-auto">
                       <h3 className="font-medium mb-3">Call Summary</h3>
                       <p className="text-gray-700 mb-3">
                         Customer reported issues with their recently purchased
@@ -151,7 +151,7 @@ export default async function TicketDetailPage({
                     </div>
                   </TabsContent>
                   <TabsContent value="transcript" className="mt-0 flex-1">
-                    <div className="bg-gray-100 rounded p-4 h-72 overflow-y-auto">
+                    <div className="bg-gray-100 rounded p-4 h-full overflow-y-auto">
                       <div className="space-y-4">
                         <div>
                           <p className="text-xs text-gray-500">Agent (00:12)</p>
@@ -205,7 +205,7 @@ export default async function TicketDetailPage({
                     </div>
                   </TabsContent>
                   <TabsContent value="suggestions" className="mt-0 flex-1">
-                    <div className="bg-gray-100 rounded p-4 h-72 overflow-y-auto">
+                    <div className="bg-gray-100 rounded p-4 h-full overflow-y-auto">
                       <h3 className="font-medium mb-3">AI Suggestions</h3>
 
                       <div className="space-y-4">
@@ -259,7 +259,7 @@ export default async function TicketDetailPage({
                       <div className="space-y-4">
                         <div>
                           <h3 className="text-sm font-medium mb-1">Ticket #</h3>
-                          <p className="text-gray-700">{ticketID}</p>
+                          <p className="text-gray-700">{callID}</p>
                         </div>
 
                         <div>

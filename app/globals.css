@@ -43,6 +43,16 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+
+    /* custom colors */
+    --inactive: 0 0% 98% 1;
+    --inactive-foreground: 0 0% 99% 1;
+    --hover: 286 68% 39% 1;
+    --hover-foreground: 0 0% 98% 1;
+    --pressedButton: 286 66% 24% 1;
+    --pressedButton-foreground: 0 0% 98% 1;
+    --active: 286 89% 54% 1;
+    --active-foreground: 0 0% 98% 1;
   }
   .dark {
     --background: 0 0% 3.9%;

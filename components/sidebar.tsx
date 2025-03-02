@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-// import { usePathname } from "next/navigation";
 import { usePathname } from "next/navigation";
 
 /**
@@ -45,7 +44,9 @@ function SidebarItem({
         // Base styles for all sidebar items
         "flex items-center gap-3 px-4 py-3 rounded-md cursor-pointer",
         // Conditional styling based on active state
-        active ? "bg-secondary" : "hover:bg-secondary/50",
+        active
+          ? "bg-activepurple text-offwhite"
+          : "hover:bg-hoverpurple text-pressedpurple hover:text-offwhite",
         // Additional padding for sub-items to create indentation
         isSubItem ? "pl-8" : ""
       )}
@@ -61,7 +62,10 @@ function SidebarItem({
 /**
  * Sidebar component renders the main navigation sidebar of the application
  * It contains the logo, main navigation items, section headers, and profile link
+ *
+ *
  */
+
 export function Sidebar() {
   const currentRoute = usePathname();
 

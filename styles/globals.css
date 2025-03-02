@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Define CSS variables for custom colors */
+:root {
+  --background: 210, 50%, 96%;
+  --foreground: 210, 50%, 20%;
+  --card: 210, 50%, 98%;
+  --card-foreground: 210, 50%, 10%;
+  --popover: 210, 50%, 98%;
+  --popover-foreground: 210, 50%, 10%;
+  --primary: 210, 50%, 50%;
+  --primary-foreground: 210, 50%, 100%;
+  --secondary: 210, 50%, 40%;
+  --secondary-foreground: 210, 50%, 90%;
+  --muted: 210, 50%, 80%;
+  --muted-foreground: 210, 50%, 30%;
+  --accent: 210, 50%, 60%;
+  --accent-foreground: 210, 50%, 100%;
+  --destructive: 0, 50%, 50%;
+  --destructive-foreground: 0, 50%, 100%;
+  --border: 210, 50%, 90%;
+  --input: 210, 50%, 95%;
+  --ring: 210, 50%, 70%;
+  --chart-1: 210, 50%, 50%;
+  --chart-2: 210, 50%, 60%;
+  --chart-3: 210, 50%, 70%;
+  --chart-4: 210, 50%, 80%;
+  --chart-5: 210, 50%, 90%;
+  --inactive: 210, 50%, 85%;
+  --inactive-foreground: 210, 50%, 25%;
+  --pressedButton: 210, 50%, 45%;
+  --pressedButton-foreground: 210, 50%, 95%;
+  --active: 210, 50%, 55%;
+  --active-foreground: 210, 50%, 100%;
+  --hover: 210, 50%, 65%;
+  --hover-foreground: 210, 50%, 100%;
+}
+
+/* Keyframe animation for moving the background image */
+@keyframes moveBackground {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 200% 200%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+}

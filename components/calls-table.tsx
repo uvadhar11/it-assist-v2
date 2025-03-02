@@ -124,16 +124,16 @@ export function CallTable({ searchQuery, dateRange }: CallTableProps) {
         <TableHeader>
           <TableRow>
             {/* Checkbox column for selecting all calls */}
-            <TableHead className="w-[50px]">
-              {/* <Checkbox
+            {/* <TableHead className="w-[50px]"> */}
+            {/* <Checkbox
                 checked={
                   selectedCalls.length === filteredCalls.length &&
                   filteredCalls.length > 0
                 }
                 onCheckedChange={toggleSelectAll}
               /> */}
-            </TableHead>
-            <TableHead>Call ID #</TableHead>
+            {/* </TableHead> */}
+            <TableHead className="pl-[50px]">Call ID #</TableHead>
             <TableHead>Topic</TableHead>
             <TableHead>Client</TableHead>
             <TableHead>Date Created</TableHead>
@@ -153,7 +153,7 @@ export function CallTable({ searchQuery, dateRange }: CallTableProps) {
                 /> */}
               {/* </TableCell> */}
               {/* Call ID with emphasized styling */}
-              <TableCell className="font-medium">
+              <TableCell className="font-medium pl-[50px]">
                 <Link href="/calls/T-1234">{call.id}</Link>
               </TableCell>
               {/* Call topic/description */}
